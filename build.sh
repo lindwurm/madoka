@@ -15,7 +15,7 @@ fi
 builddir=$1
 device=$2
 
-cd $builddir
+cd ../$builddir
 
 # repo sync
 if [ $4 -eq 1 ]; then
