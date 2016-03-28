@@ -39,13 +39,17 @@ zipdate=$(date -u '+%Y%m%d')
 # AOKPは他と違う上にホストのタイムゾーン基準での日時です
 aokpdate=$(date '+%Y-%m-%d_%H%M')
 
-# ディレクトリ名からツイート用のROM情報の設定とzipのファイル名当てをする
+source build/envsetup.sh
+breakfast $device
+
+# ディレクトリ名からツイート用のROM情報の設定をする
 if [ $builddir = cm13 ]; then
 	source="CyanogenMod 13.0"
-	zipname="cm-13.0-${zipdate}-UNOFFICIAL-$device"
+	zipname=$(get_build_var CM_VERSION)
 elif [ $builddir = rr ]; then
-	source="ResurrectionRemix v5.6.5"
-	zipname="ResurrectionRemix-M-v5.6.5-${zipdate}-$device"
+	vernum=$(get_build_var CM_VERSION | cut -c21-26)
+	source="ResurrectionRemix ${vernum}"
+	zipname=$(get_build_var CM_VERSION)
 elif [ $builddir = aokp ]; then
 	source="AOKP (Marshmallow)"
 	zipname="aokp_${device}_mm_unofficial_${aokpdate}"
@@ -61,11 +65,7 @@ if [ $3 -eq 1 ]; then
 fi
 
 # ビルド
-source build/envsetup.sh
-
-echo -e "\n"
-
-brunch ${device} 2>&1 | tee "../log/$filename"
+mka bacon 2>&1 | tee "../log/$filename"
 
 if [ $(echo ${PIPESTATUS[0]}) -eq 0 ]; then
 	ans=1
