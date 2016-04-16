@@ -29,7 +29,7 @@
 ```bash
 mkdir -p build
 cd build
-git clone https://github.com/lindwurm/mashiroBuild.git
+git clone https://github.com/lindwurm/madoka.git
 ```
 
 - ディレクトリ構造こんな感じになります
