@@ -32,8 +32,8 @@ cd build
 git clone https://github.com/lindwurm/madoka.git
 ```
 
-- ディレクトリ構造こんな感じになります
-    - `~/build` の名前はスクリプトに関係しませんし、わたしは実際のところ `~/ssd` にしていて、この実態は `/ssd1` にマウントされたSSDだったりします。)
+- ディレクトリ構造こんな感じになります(`/log`以下と`~/rom`は実行時に作成されます)
+    - `~/build` の名前はスクリプトに関係しませんのでご自由にどうぞ (わたしは実際のところ `~/ssd` にしていて、この実態は `/ssd1` にマウントされたSSDだったりします。)
 
 ```
 ~/
@@ -58,6 +58,14 @@ git clone https://github.com/lindwurm/madoka.git
 ```bash
 ./build.sh [ROMのディレクトリ名] [ビルドターゲット] <ツイート可否> <repo sync可否> <make clean可否>
 ```
+
+例えば `hammerhead` 向けのResurrection Remixをツイート有、repo sync有、make clean有でビルドする場合は
+
+```
+./build.sh rr hammerhead 1 1 1
+```
+
+です。
 
 ## ライセンス
 
