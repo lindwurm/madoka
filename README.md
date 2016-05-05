@@ -1,7 +1,8 @@
 # madoka
 
 主にカスタムROMのビルド実行用スクリプトです。  
-優秀なマネージャーのつもりですが、セットアップまではしてくれません。
+優秀なマネージャーのつもりですが、セットアップまではしてくれません。  
+[CyanogenMod 13のビルド方法 - dev:mordiford](http://dev.maud.io/entry/2016/04/25/how-to-build-cm13) や [Resurrection Remix のビルド方法 - dev:mordiford](http://dev.maud.io/entry/2016/03/18/how-to-build-rr) を参考に実施してください。
 
 ## 機能
 
