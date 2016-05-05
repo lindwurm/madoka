@@ -7,19 +7,17 @@
 
 - 実行時の引数によるROM選択・ビルドターゲット・ツイート可否・ `repo sync` 可否・ `make clean` 可否 の指定
     - 対話型でないので一度実行すれば終了まで操作不要
-- 開始/終了時にTwitterへ投稿
-    - [oysttyer](https://github.com/oysttyer/oysttyer) に丸投げしています。
+- 開始/終了時にTwitterへ投稿可能(任意)
+    - [oysttyer](https://github.com/oysttyer/oysttyer) に丸投げしています。別途セットアップは済ませておいてください
     - 各自で使う際はハッシュタグとか変えといてください
 - ログの保存、ビルド成否による保存先の振り分け
 - 複数種類のカスタムROMに対応可能
-    - ファイル名のフォーマット等、対応は各自で
     - とりあえずCyanogenModとResurrection RemixとAOKPのフォーマットに対応しています
-        - が、バージョンベタ打ちなのが欠点
+        - 他のROMのフォーマットに対応するPull Requestとかご自由にどうぞ
 - 終了時に [Pushbullet](https://www.pushbullet.com/) APIを使用したプッシュ通知
     - アクセストークンの発行が必要です
 - ビルド完了時に [MEGA](https://mega.nz) へのアップロード
     - MEGAのアカウント及び別途 [megatools](https://megatools.megous.com/) のセットアップが必要
-    - あとたぶんMEGA上でフォルダ作っとかないとコケるかも？
 - ビルド完了後に別ディレクトリへROMの `.zip` を退避
     - デフォルトでは `~/rom` になっています
     - 連続で複数機種ビルドする際に毎回 `make clean` する運用も可能に
