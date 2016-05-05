@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p ../log/success ../log/fail ~/rom
+
 # YOUR_ACCESS_TOKEN には https://www.pushbullet.com/#settings/account から取得したトークンを使用
 PUSHBULLET_TOKEN=YOUR_ACCESS_TOKEN
 
@@ -52,8 +54,9 @@ elif [ $builddir = rr ]; then
 	zipname=$(get_build_var CM_VERSION)
 elif [ $builddir = aokp ]; then
 	source="AOKP (Marshmallow)"
-	zipname="aokp_${device}_mm_unofficial_${aokpdate}"
+	zipname="aokp_${device}_mm_unofficial_${aokpdate}" #要調査
 else
+# 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
 	zipname="*"
 fi
@@ -107,8 +110,8 @@ echo -e "\n"
 # man を参照の上 ~/.megarc にユーザ名とパスワードを記載して使用
 if [ $ans -eq 1 ]; then
 
-	# $device に該当するフォルダが無い場合に備えてアップロード先はファイル名ごと指定
-	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/mashiro/$device/${zipname}.zip
+	megamkdir /Root/mashiro/$device
+	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/mashiro/$device/
 
 	mkdir -p ~/rom/$device
 
