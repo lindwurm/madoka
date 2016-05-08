@@ -17,6 +17,9 @@
         - 他のROMのフォーマットに対応するPull Requestとかご自由にどうぞ
 - 終了時に [Pushbullet](https://www.pushbullet.com/) APIを使用したプッシュ通知
     - アクセストークンの発行が必要です
+    - デフォルトでは自分から自分へのメッセージ扱いになるんですが、Channel作って `channel_tag` とか使うと自分の持ってるチャンネルに投げることとかもできます(なおpublicになります)
+        - 例: [@mashiro-build](https://www.pushbullet.com/channel?tag=mashiro-build)
+        - 詳しくは [Pushbullet API](https://docs.pushbullet.com/#create-push) 読んでください
 - ビルド完了時に [MEGA](https://mega.nz) へのアップロード
     - MEGAのアカウント及び別途 [megatools](https://megatools.megous.com/) のセットアップが必要
 - ビルド完了後に別ディレクトリへROMの `.zip` を退避
