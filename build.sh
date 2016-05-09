@@ -38,8 +38,6 @@ filename="${filetime}_${builddir}_${device}.log"
 
 # CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意。
 zipdate=$(date -u '+%Y%m%d')
-# AOKPは他と違う上にホストのタイムゾーン基準での日時です
-aokpdate=$(date '+%Y-%m-%d_%H%M')
 
 source build/envsetup.sh
 breakfast $device
@@ -47,17 +45,17 @@ breakfast $device
 # ディレクトリ名からツイート用のROM情報の設定をする
 if [ $builddir = cm13 ]; then
 	source="CyanogenMod 13.0"
+	short="CM13"
 	zipname="cm-$(get_build_var CM_VERSION)"
 elif [ $builddir = rr ]; then
 	vernum=$(get_build_var CM_VERSION | cut -c21-26)
 	source="ResurrectionRemix ${vernum}"
+	short="RR ${vernum}"
 	zipname=$(get_build_var CM_VERSION)
-elif [ $builddir = aokp ]; then
-	source="AOKP (Marshmallow)"
-	zipname="aokp_${device}_mm_unofficial_${aokpdate}" #要調査
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
+	short="${source}"
 	zipname="*"
 fi
 
