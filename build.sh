@@ -63,7 +63,7 @@ fi
 
 # 開始時のツイート
 if [ $3 -eq 1 ]; then
-	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #mashiroBuild")
+	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #madokaBuild")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
 fi
 
@@ -88,16 +88,16 @@ echo -e "\n"
 if [ $3 -eq 1 ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
 	if [ $ans -eq 1 ]; then
-		twfinish=$(echo -e "${zipname} のビルドに成功しました！\n\n$endstr\n\n$endtime #mashiroBuild")
+		twfinish=$(echo -e "${zipname} のビルドに成功しました！\n\n$endstr\n\n$endtime #madokaBuild")
 	else
-		twfinish=$(echo -e "${device} 向け ${source} のビルドに失敗しました…\n\n$endstr\n\n$endtime #mashiroBuild")
+		twfinish=$(echo -e "${device} 向け ${source} のビルドに失敗しました…\n\n$endstr\n\n$endtime #madokaBuild")
 	fi
 
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
 fi
 
 # Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に
-endpush="build for ${device} #mashiroBuild"
+endpush="build for ${device} #madokaBuild"
 curl -u ${PUSHBULLET_TOKEN}: -X POST \
   https://api.pushbullet.com/v2/pushes \
   --header "Content-Type: application/json" \
