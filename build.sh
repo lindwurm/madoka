@@ -47,7 +47,7 @@ breakfast $device
 # ディレクトリ名からツイート用のROM情報の設定をする
 if [ $builddir = cm13 ]; then
 	source="CyanogenMod 13.0"
-	zipname=$(get_build_var CM_VERSION)
+	zipname="cm-$(get_build_var CM_VERSION)"
 elif [ $builddir = rr ]; then
 	vernum=$(get_build_var CM_VERSION | cut -c21-26)
 	source="ResurrectionRemix ${vernum}"
@@ -97,11 +97,14 @@ if [ $3 -eq 1 ]; then
 fi
 
 # Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に
-endpush="build for ${device} #madokaBuild"
+
+pbtitle=$(echo -e "${statusdir}: Build ${short} for ${device}")
+
 curl -u ${PUSHBULLET_TOKEN}: -X POST \
   https://api.pushbullet.com/v2/pushes \
   --header "Content-Type: application/json" \
-  --data-binary "{\"type\": \"note\", \"title\": \"${endpush}\", \"body\": \"${endstr}\"}"
+  --data-binary "{\"type\": \"note\", \"title\": \"${pbtitle}\", \"body\": \"${endstr}\"}"
+
 
 echo -e "\n"
 
@@ -110,8 +113,8 @@ echo -e "\n"
 # man を参照の上 ~/.megarc にユーザ名とパスワードを記載して使用
 if [ $ans -eq 1 ]; then
 
-	megamkdir /Root/mashiro/$device
-	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/mashiro/$device/
+	megamkdir /Root/madoka/$device
+	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/madoka/$device/
 
 	mkdir -p ~/rom/$device
 
