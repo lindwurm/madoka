@@ -111,8 +111,8 @@ echo -e "\n"
 if [ $ans -eq 1 ]; then
 
 	# $device に該当するフォルダは事前に作っておいてください.
-	# megamkdir --path /Root/mashiro/$device
-	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/mashiro/$device/${zipname}.zip
+	# megamkdir --path /Root/madoka/$device
+	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/madoka/$device/${zipname}.zip
 
 	mkdir -p ~/rom/$device
 
