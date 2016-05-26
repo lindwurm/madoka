@@ -36,7 +36,7 @@ starttime=$(date '+%Y/%m/%d %T')
 filetime=$(date '+%Y-%m-%d_%H-%M-%S')
 filename="${filetime}_${builddir}_${device}.log"
 
-# CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意。
+# CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意
 zipdate=$(date -u '+%Y%m%d')
 
 source build/envsetup.sh
@@ -61,7 +61,7 @@ fi
 
 # 開始時のツイート
 if [ $3 -eq 1 ]; then
-	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #madokaBuild")
+	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #mashiroBuild")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
 fi
 
@@ -71,38 +71,37 @@ mka bacon 2>&1 | tee "../log/$filename"
 if [ $(echo ${PIPESTATUS[0]}) -eq 0 ]; then
 	ans=1
 	statusdir="success"
+	endstr=$(cat -v "../log/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 30-)
+	statustw="${zipname} のビルドに成功しました！"
 else
 	ans=0
 	statusdir="fail"
+	endstr=$(cat -v "../log/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 36-)
+	statustw="${device} 向け ${source} のビルドに失敗しました…"
 fi
 
 cd ..
-mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
 # 結果のツイート
-	endstr=$(cat -v "log/$statusdir/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 2-)
 if [ $3 -eq 1 ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
-	if [ $ans -eq 1 ]; then
-		twfinish=$(echo -e "${zipname} のビルドに成功しました！\n\n$endstr\n\n$endtime #madokaBuild")
-	else
-		twfinish=$(echo -e "${device} 向け ${source} のビルドに失敗しました…\n\n$endstr\n\n$endtime #madokaBuild")
-	fi
-
+	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #mashiroBuild")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
 fi
 
 # Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に
-
 pbtitle=$(echo -e "${statusdir}: Build ${short} for ${device}")
+pbbody=$(cat -v "log/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 2-)
 
 curl -u ${PUSHBULLET_TOKEN}: -X POST \
   https://api.pushbullet.com/v2/pushes \
   --header "Content-Type: application/json" \
-  --data-binary "{\"type\": \"note\", \"title\": \"${pbtitle}\", \"body\": \"${endstr}\"}"
+  --data-binary "{\"type\": \"note\", \"title\": \"${pbtitle}\", \"body\": \"${pbbody}\"}"
 
+# ログ移す
+mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
@@ -111,13 +110,14 @@ echo -e "\n"
 # man を参照の上 ~/.megarc にユーザ名とパスワードを記載して使用
 if [ $ans -eq 1 ]; then
 
-	megamkdir /Root/madoka/$device
-	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/madoka/$device/
+	# $device に該当するフォルダは事前に作っておいてください.
+	# megamkdir --path /Root/mashiro/$device
+	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/mashiro/$device/${zipname}.zip
 
 	mkdir -p ~/rom/$device
 
-	mv -v $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/
-	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/
+	mv -v $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/${zipname}.zip
+	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}.zip.md5sum
 
 	echo -e "\n"
 
