@@ -116,8 +116,8 @@ if [ $ans -eq 1 ]; then
 
 	mkdir -p ~/rom/$device
 
-	mv -v $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/${zipname}.zip
-	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}.zip.md5sum
+	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/${zipname}.zip
+	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}.zip.md5sum
 
 	echo -e "\n"
 
