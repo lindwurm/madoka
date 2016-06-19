@@ -21,7 +21,7 @@ cd ../$builddir
 
 # repo sync
 if [ $4 -eq 1 ]; then
-	repo sync -j8 --force-sync
+	repo sync -j8 -c -f --force-sync --no-clone-bundle
 	echo -e "\n"
 fi
 
