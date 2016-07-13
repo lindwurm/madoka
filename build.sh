@@ -33,7 +33,7 @@ fi
 
 # 現在日時取得、ログのファイル名設定
 starttime=$(date '+%Y/%m/%d %T')
-filetime=$(date '+%Y-%m-%d_%H-%M-%S')
+filetime=$(date '+%Y%m%d_%H%M%S')
 filename="${filetime}_${builddir}_${device}.log"
 
 # CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意
@@ -105,19 +105,37 @@ mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
-# ビルドが成功してればMEGAに上げつつ ~/rom に移動しておく
-# megaput は https://megatools.megous.com から megatools をインストール、
-# man を参照の上 ~/.megarc にユーザ名とパスワードを記載して使用
+# ビルドが成功してればGoogle Driveに上げつつ ~/rom に移動しておく
 if [ $ans -eq 1 ]; then
 
-	# $device に該当するフォルダは事前に作っておいてください.
-	# megamkdir --path /Root/madoka/$device
-	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/madoka/$device/${zipname}.zip
+	# gdrive https://github.com/prasmussen/gdrive を使います
+	# golang をインストールした上でREADMEの Download からバイナリ落として来る
+	# 適当に ~/gdrive あたりに置いて chmod 755 gdrive
+	# ~/gdrive list で初回はWebからトークン取得してフォルダのIdを取る
+	# 端末ごとに振り分けたいなら以下のように機種名で振り分けて gpath にフォルダのIdを振る
+	# 最低限 FOLDER_ID はきちんと設定してください
+	# 用法: ~/gdrive upload -p <フォルダのId> <アップロードするファイル名>
+
+	case $device in
+		hammerhead)
+			gpath="HAMMERHEAD_FOLDER_ID";;
+		shamu)
+			gpath="SHAMU_FOLDER_ID";;
+		bullhead)
+			gpath="BULLHEAD_FOLDER_ID";;
+		angler)
+			gpath="ANGLER_FOLDER_ID";;
+		*)
+			gpath="FOLDER_ID"
+	esac
+
+	mv -v $builddir/out/target/product/$device/${zipname}.zip ${zipname}_${filetime}.zip
+	~/gdrive upload -p $gpath ${zipname}_${filetime}.zip
 
 	mkdir -p ~/rom/$device
 
-	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/${zipname}.zip
-	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}.zip.md5sum
+	mv -v ${zipname}_${filetime}.zip ~/rom/$device/${zipname}_${filetime}.zip
+	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}_${filetime}.zip.md5sum
 
 	echo -e "\n"
 
