@@ -71,12 +71,12 @@ mka bacon 2>&1 | tee "../log/$filename"
 if [ $(echo ${PIPESTATUS[0]}) -eq 0 ]; then
 	ans=1
 	statusdir="success"
-	endstr=$(cat -v "../log/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 30-  | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g')
+	endstr=$(tail -n 3 "../log/$filename" | tr -d '\n' | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | sed 's/#//g' | sed 's/make completed successfully//g' | sed 's/^[ ]*//g')
 	statustw="${zipname} のビルドに成功しました！"
 else
 	ans=0
 	statusdir="fail"
-	endstr=$(cat -v "../log/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 36- | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g')
+	endstr=$(tail -n 3 "../log/$filename" | tr -d '\n' | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | sed 's/#//g' | sed 's/make failed to build some targets//g' | sed 's/^[ ]*//g')
 	statustw="${device} 向け ${source} のビルドに失敗しました…"
 fi
 
