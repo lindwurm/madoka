@@ -105,20 +105,12 @@ mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
-# ビルドが成功してればMEGAに上げつつ ~/rom に移動しておく
-# megaput は https://megatools.megous.com から megatools をインストール、
-# man を参照の上 ~/.megarc にユーザ名とパスワードを記載して使用
+# ビルドが成功してれば ~/rom に移動しておく
 if [ $ans -eq 1 ]; then
-
-	# $device に該当するフォルダは事前に作っておいてください.
-	# megamkdir --path /Root/madoka/$device
-	megaput $builddir/out/target/product/$device/${zipname}.zip --path /Root/madoka/$device/${zipname}.zip
-
 	mkdir -p ~/rom/$device
 
 	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/${zipname}.zip
 	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}.zip.md5sum
 
 	echo -e "\n"
-
 fi
