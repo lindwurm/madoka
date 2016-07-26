@@ -71,7 +71,7 @@ mka bacon 2>&1 | tee "../log/$filename"
 if [ $(echo ${PIPESTATUS[0]}) -eq 0 ]; then
 	ans=1
 	statusdir="success"
-	endstr=$(tail -n 3 "../log/$filename" | tr -d '\n' | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | sed 's/#//g' | sed 's/make completed successfully//g') | sed 's/^[ ]*//g')
+	endstr=$(tail -n 3 "../log/$filename" | tr -d '\n' | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | sed 's/#//g' | sed 's/make completed successfully//g' | sed 's/^[ ]*//g')
 	statustw="${zipname} のビルドに成功しました！"
 else
 	ans=0
