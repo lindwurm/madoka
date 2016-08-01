@@ -48,9 +48,9 @@ if [ $builddir = cm13 ]; then
 	short="CM13"
 	zipname="cm-$(get_build_var CM_VERSION)"
 elif [ $builddir = rr ]; then
-	vernum=$(get_build_var CM_VERSION | cut -c21-26)
-	source="ResurrectionRemix ${vernum}"
-	short="RR ${vernum}"
+	vernum=$(get_build_var PRODUCT_VERSION)
+	source="ResurrectionRemix v${vernum}"
+	short="RR v${vernum}"
 	zipname=$(get_build_var CM_VERSION)
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
