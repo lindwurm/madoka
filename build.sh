@@ -32,13 +32,12 @@ if [ $5 -eq 1 ]; then
 fi
 
 # 現在日時取得、ログのファイル名設定
+# CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意
 starttime=$(date '+%Y/%m/%d %T')
-filetime=$(date '+%Y%m%d_%H%M%S')
+filetime=$(date -u '+%Y%m%d_%H%M%S')
 filename="${filetime}_${builddir}_${device}.log"
 
-# CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意
-zipdate=$(date -u '+%Y%m%d')
-
+# いつもの
 source build/envsetup.sh
 breakfast $device
 
@@ -47,16 +46,21 @@ if [ $builddir = cm13 ]; then
 	source="CyanogenMod 13.0"
 	short="CM13"
 	zipname="cm-$(get_build_var CM_VERSION)"
+	newzipname="cm-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-$(CM_BUILDTYPE)-$(get_build_var CM_BUILD)"
+
 elif [ $builddir = rr ]; then
 	vernum=$(get_build_var PRODUCT_VERSION)
 	source="ResurrectionRemix v${vernum}"
 	short="RR v${vernum}"
-	zipname=$(get_build_var CM_VERSION)
+	zipname="$(get_build_var CM_VERSION)"
+	newzipname="ResurrectionRemix-M-v$(get_build_var PRODUCT_VERSION)-${filetime}-$(get_build_var CM_BUILD)"
+
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
 	short="${source}"
 	zipname="*"
+	newzipname="${zipname}"
 fi
 
 # 開始時のツイート
@@ -129,13 +133,13 @@ if [ $ans -eq 1 ]; then
 			gpath="FOLDER_ID"
 	esac
 
-	mv -v $builddir/out/target/product/$device/${zipname}.zip ${zipname}_${filetime}.zip
-	~/gdrive upload -p $gpath ${zipname}_${filetime}.zip
+	mv -v $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
+	~/gdrive upload -p $gpath ${newzipname}.zip
 
 	mkdir -p ~/rom/$device
 
-	mv -v ${zipname}_${filetime}.zip ~/rom/$device/${zipname}_${filetime}.zip
-	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}_${filetime}.zip.md5sum
+	mv -v ${newzipname}.zip ~/rom/$device/${newzipname}.zip
+	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${newzipname}.zip.md5sum
 
 	echo -e "\n"
 
