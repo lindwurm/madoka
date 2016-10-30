@@ -5,6 +5,9 @@ mkdir -p ../log/success ../log/fail ~/rom
 # YOUR_ACCESS_TOKEN には https://www.pushbullet.com/#settings/account から取得したトークンを使用
 PUSHBULLET_TOKEN=YOUR_ACCESS_TOKEN
 
+# ツイート用のハッシュタグを必要に応じて変えてください
+TWEET_TAG="madokaBuild"
+
 # 実行時の引数が正しいかチェック
 if [ $# -ne 5 ]; then
 	echo "指定された引数は$#個です。" 1>&2
@@ -65,7 +68,7 @@ fi
 
 # 開始時のツイート
 if [ $3 -eq 1 ]; then
-	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #madokaBuild")
+	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
 fi
 
@@ -91,7 +94,7 @@ echo -e "\n"
 # 結果のツイート
 if [ $3 -eq 1 ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
-	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #madokaBuild")
+	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
 fi
 
