@@ -9,27 +9,38 @@ PUSHBULLET_TOKEN=YOUR_ACCESS_TOKEN
 TWEET_TAG="madokaBuild"
 
 # 実行時の引数が正しいかチェック
-if [ $# -ne 5 ]; then
+if [ $# -lt 2 ]; then
 	echo "指定された引数は$#個です。" 1>&2
-	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [ツイート可否] [repo sync可否] [make clean可否]" 1>&2
-	echo "ツイート、repo sync、make cleanの可否は1(有効)か0(無効)で選択してください。" 1>&2
+	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [-t] [-s] [-c]" 1>&2
+	echo "ツイートは-t、repo syncは-s、make cleanは-cを指定してください。" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
 	exit 1
 fi
 
 builddir=$1
 device=$2
+shift 2
+
+while getopts :tsc argument; do
+case $argument in
+	t) tweet=true ;;
+	s) sync=true ;;
+	c) clean=true ;;
+	*) echo "正しくない引数が指定されました。" 1>&2
+	   exit 1 ;;
+esac
+done
 
 cd ../$builddir
 
 # repo sync
-if [ $4 -eq 1 ]; then
+if [ "$sync" = "true" ]; then
 	repo sync -j8 -c -f --force-sync --no-clone-bundle
 	echo -e "\n"
 fi
 
 # make clean
-if [ $5 -eq 1 ]; then
+if [ "$clean" = "true" ]; then
 	make clean
 	echo -e "\n"
 fi
@@ -63,7 +74,7 @@ else
 fi
 
 # 開始時のツイート
-if [ $3 -eq 1 ]; then
+if [ "$tweet" = "true" ]; then
 	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
 fi
@@ -88,7 +99,7 @@ cd ..
 echo -e "\n"
 
 # 結果のツイート
-if [ $3 -eq 1 ]; then
+if [ "$tweet" = "true" ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
 	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
