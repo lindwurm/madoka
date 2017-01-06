@@ -57,15 +57,16 @@ source build/envsetup.sh
 breakfast $device
 
 # ディレクトリ名からツイート用のROM情報の設定をする
-if [ $builddir = cm13 ]; then
-	source="CyanogenMod 13.0"
-	short="CM13"
-	zipname="cm-$(get_build_var CM_VERSION)"
-elif [ $builddir = rr ]; then
-	vernum=$(get_build_var PRODUCT_VERSION)
-	source="ResurrectionRemix v${vernum}"
-	short="RR v${vernum}"
-	zipname=$(get_build_var CM_VERSION)
+if [ $builddir = lineage ]; then
+	vernum="$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)"
+	source="LineageOS ${vernum}"
+	short="${source}"
+	zipname="lineage-$(get_build_var LINEAGE_VERSION)"
+elif [ $builddir = aicp ]; then
+	vernum="$(get_build_var AICP_BRANCH)-$(get_build_var VERSION)"
+	source="AICP-${vernum}"
+	short="${source}"
+	zipname="$(get_build_var AICP_VERSION)"
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
