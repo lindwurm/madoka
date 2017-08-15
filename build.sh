@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# ビルド用
+LANG=C
+export CCACHE_DIR=~/ccache
+export USE_CCACHE=1
+
+# 作っとく
 mkdir -p ../log/success ../log/fail ~/rom
 
 # YOUR_ACCESS_TOKEN には https://www.pushbullet.com/#settings/account から取得したトークンを使用
@@ -32,6 +38,7 @@ esac
 done
 
 cd ../$builddir
+prebuilts/misc/linux-x86/ccache/ccache -M 50G
 
 # repo sync
 if [ "$sync" = "true" ]; then
@@ -53,6 +60,7 @@ filename="${filetime}_${builddir}_${device}.log"
 # CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意
 zipdate=$(date -u '+%Y%m%d')
 
+# いつもの
 source build/envsetup.sh
 breakfast $device
 
@@ -62,22 +70,28 @@ if [ $builddir = lineage ]; then
 	source="LineageOS ${vernum}"
 	short="${source}"
 	zipname="lineage-$(get_build_var LINEAGE_VERSION)"
+	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-mordiford-$(device)"
+
 elif [ $builddir = aicp ]; then
 	vernum="$(get_build_var AICP_BRANCH)-$(get_build_var VERSION)"
 	source="AICP-${vernum}"
 	short="${source}"
 	zipname="$(get_build_var AICP_VERSION)"
+	newzipname="aicp_${device}_${vernum}-$(get_build_var AICP_BUILDTYPE)-${filetime}"
+
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
 	short="${source}"
 	zipname="*"
+	newzipname="${zipname}"
 fi
 
 # 開始時のツイート
 if [ "$tweet" = "true" ]; then
 	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
+	echo $twstart | toot
 fi
 
 # ビルド
@@ -95,6 +109,9 @@ else
 	statustw="${device} 向け ${source} のビルドに失敗しました…"
 fi
 
+# jack-server絶対殺すマン
+prebuilts/sdk/tools/jack-admin kill-server
+
 cd ..
 
 echo -e "\n"
@@ -104,6 +121,7 @@ if [ "$tweet" = "true" ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
 	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
+	echo $twfinish | toot
 fi
 
 # Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に
@@ -120,12 +138,19 @@ mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
-# ビルドが成功してれば ~/rom に移動しておく
+# ビルドが成功してたら
 if [ $ans -eq 1 ]; then
-	mkdir -p ~/rom/$device
+	# リネームする
+	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
 
-	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ~/rom/$device/${zipname}.zip
-	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${zipname}.zip.md5sum
+	# Nextcloud に上げる。 https://github.com/cghdev/cloud-dl 使用
+	~/cloud-dl -k public/rom/${device}/
+	~/cloud-dl -u ${newzipname}.zip public/rom/${device}/
+
+  # ~/rom に上げる
+	mkdir -p ~/rom/$device
+	mv -v ${newzipname}.zip ~/rom/$device/${newzipname}.zip
+	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${newzipname}.zip.md5sum
 
 	echo -e "\n"
 fi

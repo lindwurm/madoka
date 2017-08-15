@@ -15,5 +15,6 @@
 - lindwurm
     - Twitter: [@lindwurm](https://twitter.com/lindwurm)
     - GitHub: [@lindwurm](https://github.com/lindwurm)
+    - Mastodon: [@hota@mstdn.maud.io](https://mstdn.maud.io/@hota)
     - Web: [maud.io](https://maud.io)
     - Blog: [dev:mordiford](http://dev.maud.io)
