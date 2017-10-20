@@ -79,6 +79,13 @@ elif [ $builddir = aicp ]; then
 	zipname="$(get_build_var AICP_VERSION)"
 	newzipname="aicp_${device}_${vernum}-$(get_build_var AICP_BUILDTYPE)-${filetime}"
 
+elif [ $builddir = du ]; then
+        vernum="$(get_build_var DU_BASE_VERSION)"
+        source="DirtyUnicorns ${vernum}"
+        short="${source}"
+        zipname="$(get_build_var DU_VERSION)"
+        newzipname="du_${device}_${vernum}-${filetime}-$(get_build_var DU_BUILD_TYPE)"
+
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
