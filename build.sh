@@ -2,6 +2,7 @@
 
 # ビルド用
 LANG=C
+export ALLOW_MISSING_DEPENDENCIES=true
 export CCACHE_DIR=~/ccache
 export USE_CCACHE=1
 
@@ -17,8 +18,8 @@ TWEET_TAG="madokaBuild"
 # 実行時の引数が正しいかチェック
 if [ $# -lt 2 ]; then
 	echo "指定された引数は$#個です。" 1>&2
-	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [-t] [-s] [-c]" 1>&2
-	echo "ツイートは-t、repo syncは-s、make cleanは-cを指定してください。" 1>&2
+	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [-t] [-s] [-c] [-x]" 1>&2
+	echo "ツイートは-t、repo syncは-s、make cleanは-c、非公開の場合は-xを指定してください。" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
 	exit 1
 fi
@@ -27,18 +28,19 @@ builddir=$1
 device=$2
 shift 2
 
-while getopts :tsc argument; do
+while getopts :tscx argument; do
 case $argument in
 	t) tweet=true ;;
 	s) sync=true ;;
 	c) clean=true ;;
+        x) private_build=true ;;
 	*) echo "正しくない引数が指定されました。" 1>&2
 	   exit 1 ;;
 esac
 done
 
 cd ../$builddir
-prebuilts/misc/linux-x86/ccache/ccache -M 50G
+prebuilts/misc/linux-x86/ccache/ccache -M 30G
 
 # repo sync
 if [ "$sync" = "true" ]; then
@@ -57,9 +59,6 @@ starttime=$(date '+%Y/%m/%d %T')
 filetime=$(date '+%Y-%m-%d_%H-%M-%S')
 filename="${filetime}_${builddir}_${device}.log"
 
-# CMやRRの場合、吐き出すzipのファイル名はUTC基準での日付なので注意
-zipdate=$(date -u '+%Y%m%d')
-
 # いつもの
 source build/envsetup.sh
 breakfast $device
@@ -70,7 +69,7 @@ if [ $builddir = lineage ]; then
 	source="LineageOS ${vernum}"
 	short="${source}"
 	zipname="lineage-$(get_build_var LINEAGE_VERSION)"
-	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-mordiford-$(device)"
+	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-${get_build_var LINEAGE_BUILDTYPE}-$(device)"
 
 elif [ $builddir = aicp ]; then
 	vernum="$(get_build_var AICP_BRANCH)-$(get_build_var VERSION)"
@@ -145,14 +144,20 @@ mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
+if [ "$private_build" = "true" ]; then
+        publishdir="private/rom"
+else
+        publishdir="public/rom"
+fi
+
 # ビルドが成功してたら
 if [ $ans -eq 1 ]; then
 	# リネームする
 	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
 
 	# Nextcloud に上げる。 https://github.com/cghdev/cloud-dl 使用
-	~/cloud-dl -k public/rom/${device}/
-	~/cloud-dl -u ${newzipname}.zip public/rom/${device}/
+	~/cloud-dl -k ${publishdir}/${device}/
+	~/cloud-dl -u ${newzipname}.zip ${publishdir}/${device}/
 
   # ~/rom に上げる
 	mkdir -p ~/rom/$device
