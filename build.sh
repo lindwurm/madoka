@@ -56,7 +56,7 @@ fi
 
 # 現在日時取得、ログのファイル名設定
 starttime=$(date '+%Y/%m/%d %T')
-filetime=$(date '+%Y-%m-%d_%H-%M-%S')
+filetime=$(date -u '+%Y%m%d_%H%M%S')
 filename="${filetime}_${builddir}_${device}.log"
 
 # いつもの
