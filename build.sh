@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # ビルド用
-LANG=C
+export LANG=C
+export LC_ALL=C.UTF-8
 export ALLOW_MISSING_DEPENDENCIES=true
+export SOONG_ALLOW_MISSING_DEPENDENCIES=true
 export CCACHE_DIR=~/ccache
 export USE_CCACHE=1
 
