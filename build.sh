@@ -87,6 +87,13 @@ elif [ $builddir = du ]; then
         zipname="$(get_build_var DU_VERSION)"
         newzipname="du_${device}_${vernum}-${filetime}-$(get_build_var DU_BUILD_TYPE)"
 
+elif [ $builddir = floko ]; then
+        vernum="$(get_build_var AICP_BRANCH)-$(get_build_var VERSION)"
+        source="floko-${vernum}"
+        short="${source}"
+        zipname="$(get_build_var AICP_VERSION)"
+        newzipname="floko_${device}_${vernum}-$(get_build_var AICP_BUILDTYPE)-${filetime}"
+
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
 	source=$builddir
