@@ -20,8 +20,11 @@ TWEET_TAG="madokaBuild"
 # 実行時の引数が正しいかチェック
 if [ $# -lt 2 ]; then
 	echo "指定された引数は$#個です。" 1>&2
-	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [-t] [-s] [-c] [-x]" 1>&2
-	echo "ツイートは-t、repo syncは-s、make cleanは-c、非公開の場合は-xを指定してください。" 1>&2
+	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [オプション]" 1>&2
+	echo "  -t: publish tweet/toot" 1>&2
+        echo "  -s: repo sync " 1>&2
+        echo "  -c: make clean" 1>&2
+        echo "  -x: upload to /private/rom/device" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
 	exit 1
 fi
