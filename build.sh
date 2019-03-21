@@ -73,26 +73,12 @@ if [ $builddir = lineage ]; then
 	zipname="lineage-$(get_build_var LINEAGE_VERSION)"
 	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-${get_build_var LINEAGE_BUILDTYPE}-$(device)"
 
-elif [ $builddir = aicp ]; then
-	vernum="$(get_build_var AICP_BRANCH)-$(get_build_var VERSION)"
-	source="AICP-${vernum}"
-	short="${source}"
-	zipname="$(get_build_var AICP_VERSION)"
-	newzipname="aicp_${device}_${vernum}-$(get_build_var AICP_BUILDTYPE)-${filetime}"
-
-elif [ $builddir = du ]; then
-        vernum="$(get_build_var DU_BASE_VERSION)"
-        source="DirtyUnicorns ${vernum}"
-        short="${source}"
-        zipname="$(get_build_var DU_VERSION)"
-        newzipname="du_${device}_${vernum}-${filetime}-$(get_build_var DU_BUILD_TYPE)"
-
 elif [ $builddir = floko ]; then
-        vernum="$(get_build_var AICP_BRANCH)-$(get_build_var VERSION)"
+        vernum="$(get_build_var FLOKO_VERSION)"
         source="floko-${vernum}"
         short="${source}"
-        zipname="$(get_build_var AICP_VERSION)"
-        newzipname="floko_${device}_${vernum}-$(get_build_var AICP_BUILDTYPE)-${filetime}"
+        zipname="$(get_build_var LINEAGE_VERSION)"
+        newzipname="Floko_v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
 
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
