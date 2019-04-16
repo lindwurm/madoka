@@ -78,10 +78,10 @@ if [ $builddir = lineage ]; then
 
 elif [ $builddir = floko ]; then
         vernum="$(get_build_var FLOKO_VERSION)"
-        source="floko-${vernum}"
+        source="floko-v${vernum}"
         short="${source}"
         zipname="$(get_build_var LINEAGE_VERSION)"
-        newzipname="Floko_v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
+        newzipname="Floko-v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
 
 else
 # 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
@@ -91,11 +91,11 @@ else
 	newzipname="${zipname}"
 fi
 
-# 開始時のツイート
+# 開始時の投稿
 if [ "$tweet" = "true" ]; then
 	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
-	echo $twstart | toot
+	echo $twstart | toot --visibility unlisted
 fi
 
 # ビルド
@@ -120,12 +120,12 @@ cd ..
 
 echo -e "\n"
 
-# 結果のツイート
+# 結果の投稿
 if [ "$tweet" = "true" ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
 	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #${TWEET_TAG}")
 	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
-	echo $twfinish | toot
+	echo $twfinish | toot --visibility unlisted
 fi
 
 # Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に
