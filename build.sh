@@ -74,7 +74,7 @@ if [ $builddir = lineage ]; then
 	source="LineageOS ${vernum}"
 	short="${source}"
 	zipname="lineage-$(get_build_var LINEAGE_VERSION)"
-	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-${get_build_var LINEAGE_BUILDTYPE}-$(device)"
+	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-$(get_build_var LINEAGE_BUILDTYPE)-${device}"
 
 elif [ $builddir = floko ]; then
         vernum="$(get_build_var FLOKO_VERSION)"
