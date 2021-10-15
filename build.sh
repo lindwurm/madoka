@@ -15,13 +15,13 @@ mkdir -p ../log/success ../log/fail ~/rom
 PUSHBULLET_TOKEN=YOUR_ACCESS_TOKEN
 
 # ツイート用のハッシュタグを必要に応じて変えてください
-TWEET_TAG="madokaBuild"
+TOOT_HASHTAG="madokaBuild"
 
 # 実行時の引数が正しいかチェック
 if [ $# -lt 2 ]; then
 	echo "指定された引数は$#個です。" 1>&2
 	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [オプション]" 1>&2
-	echo "  -t: publish tweet/toot" 1>&2
+	echo "  -t: publish toot" 1>&2
         echo "  -s: repo sync " 1>&2
         echo "  -c: make clean" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
@@ -34,7 +34,7 @@ shift 2
 
 while getopts :tsc argument; do
 case $argument in
-	t) tweet=true ;;
+	t) toot=true ;;
 	s) sync=true ;;
 	c) clean=true ;;
 	*) echo "正しくない引数が指定されました。" 1>&2
@@ -90,9 +90,8 @@ else
 fi
 
 # 開始時の投稿
-if [ "$tweet" = "true" ]; then
-	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #${TWEET_TAG}")
-	perl ~/oysttyer/oysttyer.pl -ssl -status="$twstart"
+if [ "$toot" = "true" ]; then
+	twstart=$(echo -e "${device} 向け ${source} のビルドを開始します。 \n\n$starttime #${TOOT_HASHTAG}")
 	echo $twstart | toot --visibility unlisted
 fi
 
@@ -119,10 +118,9 @@ cd ..
 echo -e "\n"
 
 # 結果の投稿
-if [ "$tweet" = "true" ]; then
+if [ "$toot" = "true" ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
-	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #${TWEET_TAG}")
-	perl ~/oysttyer/oysttyer.pl -ssl -status="$twfinish" -autosplit=cut
+	twfinish=$(echo -e "$statustw\n\n$endstr\n\n$endtime #${TOOT_HASHTAG}")
 	echo $twfinish | toot --visibility unlisted
 fi
 
