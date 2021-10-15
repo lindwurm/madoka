@@ -24,7 +24,6 @@ if [ $# -lt 2 ]; then
 	echo "  -t: publish tweet/toot" 1>&2
         echo "  -s: repo sync " 1>&2
         echo "  -c: make clean" 1>&2
-        echo "  -x: upload to /private/rom/device" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
 	exit 1
 fi
@@ -33,12 +32,11 @@ builddir=$1
 device=$2
 shift 2
 
-while getopts :tscx argument; do
+while getopts :tsc argument; do
 case $argument in
 	t) tweet=true ;;
 	s) sync=true ;;
 	c) clean=true ;;
-        x) private_build=true ;;
 	*) echo "正しくない引数が指定されました。" 1>&2
 	   exit 1 ;;
 esac
@@ -142,22 +140,12 @@ mv -v log/$filename log/$statusdir/
 
 echo -e "\n"
 
-if [ "$private_build" = "true" ]; then
-        publishdir="private/rom"
-else
-        publishdir="public/rom"
-fi
-
 # ビルドが成功してたら
 if [ $ans -eq 1 ]; then
 	# リネームする
 	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
 
-	# Nextcloud に上げる。 https://github.com/cghdev/cloud-dl 使用
-	~/cloud-dl -k ${publishdir}/${device}/
-	~/cloud-dl -u ${newzipname}.zip ${publishdir}/${device}/
-
-  # ~/rom に上げる
+	# ~/rom に上げる
 	mkdir -p ~/rom/$device
 	mv -v ${newzipname}.zip ~/rom/$device/${newzipname}.zip
 	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${newzipname}.zip.md5sum
