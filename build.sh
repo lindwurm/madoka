@@ -1,12 +1,7 @@
 #!/bin/bash
 
 # ビルド用
-export LANG=C
 export LC_ALL=C.UTF-8
-export ALLOW_MISSING_DEPENDENCIES=true
-export SOONG_ALLOW_MISSING_DEPENDENCIES=true
-export CCACHE_DIR=~/ccache
-export USE_CCACHE=1
 
 # 作っとく
 mkdir -p ../log/success ../log/fail ~/rom
@@ -21,9 +16,12 @@ TOOT_HASHTAG="madokaBuild"
 if [ $# -lt 2 ]; then
 	echo "指定された引数は$#個です。" 1>&2
 	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [オプション]" 1>&2
+	echo "オプション" 1>&2
 	echo "  -t: publish toot" 1>&2
         echo "  -s: repo sync " 1>&2
         echo "  -c: make clean" 1>&2
+        echo "  -n: set SELINUX_IGNORE_NEVERALLOWS" 1>&2
+        echo "  -d: destroy ccache (zero statics)" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
 	exit 1
 fi
@@ -32,18 +30,34 @@ builddir=$1
 device=$2
 shift 2
 
-while getopts :tsc argument; do
+while getopts :tscnd argument; do
 case $argument in
 	t) toot=true ;;
 	s) sync=true ;;
 	c) clean=true ;;
+	n) allow_neverallow=true ;;
+	d) destroy_ccache=true ;;
 	*) echo "正しくない引数が指定されました。" 1>&2
 	   exit 1 ;;
 esac
 done
 
 cd ../$builddir
-prebuilts/misc/linux-x86/ccache/ccache -M 30G
+
+# setup ccache
+if [ "$CCACHE_ENABLE" = "true" ]; then
+        export USE_CCACHE=1
+        export CCACHE_EXEC=/usr/bin/ccache
+	mkdir -p ~/ccache/$builddir
+	export CCACHE_DIR=~/ccache/$builddir
+	ccache -M 30G
+
+	# -d stands for destroy_ccache
+	if [ "$destroy_ccache" = "true" ]; then
+		ccache -C -z
+		echo -e "\n"
+	fi
+fi
 
 # repo sync
 if [ "$sync" = "true" ]; then
@@ -51,10 +65,11 @@ if [ "$sync" = "true" ]; then
 	echo -e "\n"
 fi
 
-# make clean
-if [ "$clean" = "true" ]; then
-	make clean
-	echo -e "\n"
+# -n stands for SELINUX_IGNORE_NEVERALLOWS
+if [ "$allow_neverallow" = "true" ]; then
+	export SELINUX_IGNORE_NEVERALLOWS=true
+else
+	export ALLOW_MISSING_DEPENDENCIES=true
 fi
 
 # 現在日時取得、ログのファイル名設定
@@ -64,29 +79,38 @@ filename="${filetime}_${builddir}_${device}.log"
 
 # いつもの
 source build/envsetup.sh
-breakfast $device
 
 # ディレクトリ名からツイート用のROM情報の設定をする
-if [ $builddir = lineage ]; then
+if [ $builddir = "lineage" ]; then
+	breakfast $device
 	vernum="$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)"
 	source="LineageOS ${vernum}"
 	short="${source}"
 	zipname="lineage-$(get_build_var LINEAGE_VERSION)"
 	newzipname="lineage-$(get_build_var PRODUCT_VERSION_MAJOR).$(get_build_var PRODUCT_VERSION_MINOR)-${filetime}-$(get_build_var LINEAGE_BUILDTYPE)-${device}"
 
-elif [ $builddir = floko ]; then
+elif [ $builddir = "floko" ]; then
+	breakfast $device
         vernum="$(get_build_var FLOKO_VERSION)"
-        source="floko-v${vernum}"
+        source="FlokoROM v${vernum}"
         short="${source}"
         zipname="$(get_build_var LINEAGE_VERSION)"
         newzipname="Floko-v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
 
 else
-# 一応対処するけど他ROMについては上記を参考にちゃんと書いてもらわないと後がめんどい
-	source=$builddir
-	short="${source}"
-	zipname="*"
-	newzipname="${zipname}"
+	echo "Error: Please define your ROM information."
+	exit 1
+fi
+
+# make clean
+if [ "$clean" = "true" ]; then
+	# Android 11 or later, `make clean` is deprecated.
+	if [$(get_build_var PLATFORM_VERSION) -ge 11 ]; then
+		build/soong/soong_ui.bash --make-mode clean
+	else
+		make clean
+	fi
+	echo -e "\n"
 fi
 
 # 開始時の投稿
@@ -109,9 +133,6 @@ else
 	endstr=$(tail -n 3 "../log/$filename" | tr -d '\n' | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | sed 's/#//g' | sed 's/make failed to build some targets//g' | sed 's/^[ ]*//g')
 	statustw="${device} 向け ${source} のビルドに失敗しました…"
 fi
-
-# jack-server絶対殺すマン
-prebuilts/sdk/tools/jack-admin kill-server
 
 cd ..
 
@@ -145,8 +166,9 @@ if [ $ans -eq 1 ]; then
 
 	# ~/rom に上げる
 	mkdir -p ~/rom/$device
-	mv -v ${newzipname}.zip ~/rom/$device/${newzipname}.zip
-	mv -v $builddir/out/target/product/$device/${zipname}.zip.md5sum ~/rom/$device/${newzipname}.zip.md5sum
+	mv -v ${newzipname}.zip ~/rom/${device}/${newzipname}.zip
+	mv -v ${builddir}/out/target/product/${device}/${zipname}.zip.md5sum ~/rom/${device}/${newzipname}.zip.md5sum
+	mv -v ${builddir}/out/target/product/${device}/changelog_${device}.txt ~/rom/${device}/changelog/${newzipname}.zip_changelog.txt
 
 	echo -e "\n"
 fi
