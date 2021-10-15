@@ -3,14 +3,16 @@
 # ビルド用
 export LC_ALL=C.UTF-8
 
+# 変数読み込み
+if [ -f .env ]; then
+	eval `cat .env | grep -v ^# | sed -e 's/\s*=\s*/=/g'`
+else
+	echo "ERROR: 同梱のファイル .env.sample を .env の名前でコピーし、必要な設定を記入してください。" 1>&2
+	exit 1
+fi
+
 # 作っとく
-mkdir -p ../log/success ../log/fail ~/rom
-
-# YOUR_ACCESS_TOKEN には https://www.pushbullet.com/#settings/account から取得したトークンを使用
-PUSHBULLET_TOKEN=YOUR_ACCESS_TOKEN
-
-# ツイート用のハッシュタグを必要に応じて変えてください
-TOOT_HASHTAG="madokaBuild"
+mkdir -p ../log/success ../log/fail ${OUTPUT_PATH}
 
 # 実行時の引数が正しいかチェック
 if [ $# -lt 2 ]; then
@@ -48,15 +50,15 @@ cd ../$builddir
 if [ "$CCACHE_ENABLE" = "true" ]; then
         export USE_CCACHE=1
         export CCACHE_EXEC=/usr/bin/ccache
-	mkdir -p ~/ccache/$builddir
-	export CCACHE_DIR=~/ccache/$builddir
-	ccache -M 30G
+	mkdir -p ${CCACHE_DIR}/$builddir
+	export CCACHE_DIR=${CCACHE_DIR}/$builddir
 
 	# -d stands for destroy_ccache
 	if [ "$destroy_ccache" = "true" ]; then
 		ccache -C -z
 		echo -e "\n"
 	fi
+	ccache -M 30G
 fi
 
 # repo sync
@@ -145,7 +147,9 @@ if [ "$toot" = "true" ]; then
 	echo $twfinish | toot --visibility unlisted
 fi
 
-# Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に
+# Pushbullet APIを使ってプッシュ通知も投げる。文言は適当に結果から切り出したもの
+if [ "$ENABLE_PUSHBULLET" = "true" ]; then
+
 pbtitle=$(echo -e "${statusdir}: Build ${short} for ${device}")
 pbbody=$(cat -v "log/$filename" | tail -n 3 | tr -d '\n' | cut -d "#" -f 5-5 | cut -c 2-)
 
@@ -153,6 +157,8 @@ curl -u ${PUSHBULLET_TOKEN}: -X POST \
   https://api.pushbullet.com/v2/pushes \
   --header "Content-Type: application/json" \
   --data-binary "{\"type\": \"note\", \"title\": \"${pbtitle}\", \"body\": \"${pbbody}\"}"
+
+fi
 
 # ログ移す
 mv -v log/$filename log/$statusdir/
@@ -164,11 +170,11 @@ if [ $ans -eq 1 ]; then
 	# リネームする
 	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
 
-	# ~/rom に上げる
-	mkdir -p ~/rom/$device
-	mv -v ${newzipname}.zip ~/rom/${device}/${newzipname}.zip
-	mv -v ${builddir}/out/target/product/${device}/${zipname}.zip.md5sum ~/rom/${device}/${newzipname}.zip.md5sum
-	mv -v ${builddir}/out/target/product/${device}/changelog_${device}.txt ~/rom/${device}/changelog/${newzipname}.zip_changelog.txt
+	# OUTPUT_PATH で指定されたパスにデバイス名でディレクトリを作成、ファイルをコピー
+	mkdir -p ${OUTPUT_PATH}/$device
+	mv -v ${newzipname}.zip ${OUTPUT_PATH}/${device}/${newzipname}.zip
+	mv -v ${builddir}/out/target/product/${device}/${zipname}.zip.md5sum ${OUTPUT_PATH}/${device}/${newzipname}.zip.md5sum
+	mv -v ${builddir}/out/target/product/${device}/changelog_${device}.txt ${OUTPUT_PATH}/${device}/changelog/${newzipname}.zip_changelog.txt
 
 	echo -e "\n"
 fi

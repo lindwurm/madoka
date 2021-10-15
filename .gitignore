@@ -1,0 +1,9 @@
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp
+.env
+.env.production
+.env.development
+
+# Ignore Apple files
+.DS_Store
