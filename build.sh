@@ -63,7 +63,7 @@ fi
 
 # repo sync
 if [ "$sync" = "true" ]; then
-	repo sync -j8 -c -f --force-sync --no-clone-bundle
+	repo sync -j$(nproc) -c --force-sync --no-clone-bundle --no-tags
 	echo -e "\n"
 fi
 
