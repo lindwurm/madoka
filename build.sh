@@ -2,10 +2,11 @@
 
 # ビルド用
 export LC_ALL=C.UTF-8
+export ALLOW_MISSING_DEPENDENCIES=true
 
 # 変数読み込み
 if [ -f .env ]; then
-	eval `cat .env | grep -v ^# | sed -e 's/\s*=\s*/=/g'`
+	source .env
 else
 	echo "ERROR: 同梱のファイル .env.sample を .env の名前でコピーし、必要な設定を記入してください。" 1>&2
 	exit 1
@@ -20,10 +21,10 @@ if [ $# -lt 2 ]; then
 	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [オプション]" 1>&2
 	echo "オプション" 1>&2
 	echo "  -t: publish toot" 1>&2
-        echo "  -s: repo sync " 1>&2
-        echo "  -c: make clean" 1>&2
-        echo "  -n: set SELINUX_IGNORE_NEVERALLOWS" 1>&2
-        echo "  -d: destroy ccache (zero statics)" 1>&2
+	echo "  -s: repo sync " 1>&2
+	echo "  -c: make clean" 1>&2
+	echo "  -n: set SELINUX_IGNORE_NEVERALLOWS" 1>&2
+	echo "  -d: destroy ccache (zero statics)" 1>&2
 	echo "ログは自動的に記録されます。" 1>&2
 	exit 1
 fi
@@ -48,8 +49,8 @@ cd ../$builddir
 
 # setup ccache
 if [ "$CCACHE_ENABLE" = "true" ]; then
-        export USE_CCACHE=1
-        export CCACHE_EXEC=/usr/bin/ccache
+	export USE_CCACHE=1
+	export CCACHE_EXEC=/usr/bin/ccache
 	mkdir -p ${CCACHE_DIR}/$builddir
 	export CCACHE_DIR=${CCACHE_DIR}/$builddir
 
@@ -70,8 +71,6 @@ fi
 # -n stands for SELINUX_IGNORE_NEVERALLOWS
 if [ "$allow_neverallow" = "true" ]; then
 	export SELINUX_IGNORE_NEVERALLOWS=true
-else
-	export ALLOW_MISSING_DEPENDENCIES=true
 fi
 
 # 現在日時取得、ログのファイル名設定
@@ -93,12 +92,11 @@ if [ $builddir = "lineage" ]; then
 
 elif [ $builddir = "floko" ]; then
 	breakfast $device
-        vernum="$(get_build_var FLOKO_VERSION)"
-        source="FlokoROM v${vernum}"
-        short="${source}"
-        zipname="$(get_build_var LINEAGE_VERSION)"
-        newzipname="Floko-v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
-
+	vernum="$(get_build_var FLOKO_VERSION)"
+	source="FlokoROM v${vernum}"
+	short="${source}"
+	zipname="$(get_build_var LINEAGE_VERSION)"
+	newzipname="Floko-v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
 else
 	echo "Error: Please define your ROM information."
 	exit 1
