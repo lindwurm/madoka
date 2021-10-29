@@ -168,6 +168,12 @@ if [ $ans -eq 1 ]; then
 	# リネームする
 	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
 
+	# アップローダーがあるなら device と newzipname を与えて投げてもらう
+	if [ "$ENABLE_UPLOAD" = "true" ]; then
+		source .env $device $newzipname
+		eval $UPLOADER
+	fi
+
 	# OUTPUT_PATH で指定されたパスにデバイス名でディレクトリを作成、ファイルをコピー
 	mkdir -p ${OUTPUT_PATH}/$device
 	mv -v ${newzipname}.zip ${OUTPUT_PATH}/${device}/${newzipname}.zip
