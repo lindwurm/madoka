@@ -165,8 +165,12 @@ echo -e "\n"
 
 # ビルドが成功してたら
 if [ $ans -eq 1 ]; then
+
+	# よく使うので先に定義
+	outdir="${builddir}/out/target/product/${device}/"
+
 	# リネームする
-	mv -v --backup=t $builddir/out/target/product/$device/${zipname}.zip ${newzipname}.zip
+	mv -v --backup=t ${outdir}/${zipname}.zip ${newzipname}.zip
 
 	# アップローダーがあるなら device と newzipname を与えて投げてもらう
 	if [ "$ENABLE_UPLOAD" = "true" ]; then
@@ -174,11 +178,23 @@ if [ $ans -eq 1 ]; then
 		eval $UPLOADER
 	fi
 
-	# OUTPUT_PATH で指定されたパスにデバイス名でディレクトリを作成、ファイルをコピー
+	# OUTPUT_PATH で指定されたパスにデバイス名でディレクトリを作成、ファイルを移動
 	mkdir -p ${OUTPUT_PATH}/$device
+
 	mv -v ${newzipname}.zip ${OUTPUT_PATH}/${device}/${newzipname}.zip
-	mv -v ${builddir}/out/target/product/${device}/${zipname}.zip.md5sum ${OUTPUT_PATH}/${device}/${newzipname}.zip.md5sum
-	mv -v ${builddir}/out/target/product/${device}/changelog_${device}.txt ${OUTPUT_PATH}/${device}/changelog/${newzipname}.zip_changelog.txt
+
+	# Move sha256/md5 checksum
+	if [ -f ${outdir}/${zipname}.zip.sha256sum ]
+		mv -v ${outdir}/${zipname}.zip.sha256sum ${OUTPUT_PATH}/${device}/${newzipname}.zip.sha256sum
+
+	else if [ -f ${outdir}/${zipname}.zip.md5sum ]; then
+		mv -v ${outdir}/${zipname}.zip.md5sum ${OUTPUT_PATH}/${device}/${newzipname}.zip.md5sum
+	fi
+
+	# Move changelog if exist
+	if [ -f ${outdir}/changelog_${device}.txt ]; then
+		mv -v ${outdir}/changelog_${device}.txt ${OUTPUT_PATH}/${device}/changelog/${newzipname}.zip_changelog.txt
+	fi
 
 	echo -e "\n"
 fi
