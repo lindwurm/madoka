@@ -174,7 +174,7 @@ if [ $ans -eq 1 ]; then
 
 	# アップローダーがあるなら device と newzipname を与えて投げてもらう
 	if [ "$ENABLE_UPLOAD" = "true" ]; then
-		source .env $device $newzipname
+		source madoka/.env $device $newzipname
 		eval $UPLOADER
 	fi
 
