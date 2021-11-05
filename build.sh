@@ -105,7 +105,7 @@ fi
 # make clean
 if [ "$clean" = "true" ]; then
 	# Android 11 or later, `make clean` is deprecated.
-	if [$(get_build_var PLATFORM_VERSION) -ge 11 ]; then
+	if [ $(get_build_var PLATFORM_VERSION) -ge 11 ]; then
 		build/soong/soong_ui.bash --make-mode clean
 	else
 		make clean
