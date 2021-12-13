@@ -49,7 +49,7 @@ cd ../${builddir}
 
 # setup ccache
 if [ "${ENABLE_CCACHE}" = "true" ]; then
-	export CCACHE_EXEC=/usr/bin/ccache
+	export CCACHE_EXEC=$(which ccache)
 	export USE_CCACHE=1
 	export CCACHE_COMPRESS=1
 	mkdir -p ${CCACHE_DIR}/${builddir}
