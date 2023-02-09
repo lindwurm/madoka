@@ -8,7 +8,7 @@ export ALLOW_MISSING_DEPENDENCIES=true
 if [ -f .env ]; then
 	source .env
 else
-	echo "ERROR: 同梱のファイル .env.sample を .env の名前でコピーし、必要な設定を記入してください。" 1>&2
+	echo "[ERROR] 同梱のファイル .env.sample を .env の名前でコピーし、必要な設定を記入してください。" 1>&2
 	exit 1
 fi
 
@@ -17,7 +17,7 @@ mkdir -p ../log/success ../log/fail ${OUTPUT_PATH}
 
 # 実行時の引数が正しいかチェック
 if [ $# -lt 2 ]; then
-	echo "指定された引数は$#個です。" 1>&2
+	echo "[ERROR] 指定された引数は$#個です。" 1>&2
 	echo "仕様: $CMDNAME [ビルドディレクトリ] [ターゲット] [オプション]" 1>&2
 	echo "オプション" 1>&2
 	echo "  -t: publish toot" 1>&2
@@ -40,7 +40,7 @@ case ${argument} in
 	c) clean=true ;;
 	n) allow_neverallow=true ;;
 	d) destroy_ccache=true ;;
-	*) echo "正しくない引数が指定されました。" 1>&2
+	*) echo "[ERROR] 正しくない引数が指定されました。" 1>&2
 	   exit 1 ;;
 esac
 done
@@ -65,6 +65,7 @@ fi
 
 # repo sync
 if [ "${sync}" = "true" ]; then
+	echo "[INFO] repo sync..."
 	repo sync -j$(nproc) -c --force-sync --no-clone-bundle --no-tags
 	echo -e "\n"
 fi
@@ -99,7 +100,7 @@ elif [ "${builddir}" = "floko" ]; then
 	zipname="$(get_build_var LINEAGE_VERSION)"
 	newzipname="Floko-v${vernum}-${device}-${filetime}-$(get_build_var FLOKO_BUILD_TYPE)"
 else
-	echo "Error: Please define your ROM information."
+	echo "[ERROR] Please define your ROM information."
 	exit 1
 fi
 
@@ -139,6 +140,20 @@ cd ..
 
 echo -e "\n"
 
+# define $outdir for upload
+# Android 11 or later, `OUT_DIR` is not recommended. Use `PRODUCT_OUT`.
+if [ $(get_build_var PLATFORM_VERSION) -ge 11 ]; then
+        outdir="${builddir}/$(build/soong/soong_ui.bash --dumpvar-mode PRODUCT_OUT)"
+else
+        outdir="${builddir}/$(get_build_var OUT_DIR)"
+fi
+
+# failsafe
+if [ "${outdir}" = "" ]; then
+        outdir="${builddir}/out/target/product/${device}"
+        echo "[WARN] outdir is missing, but define it again!"
+fi
+
 # 結果の投稿
 if [ "${toot}" = "true" ]; then
 	endtime=$(date '+%Y/%m/%d %H:%M:%S')
@@ -166,9 +181,6 @@ echo -e "\n"
 
 # ビルドが成功してたら
 if [ ${ans} -eq 1 ]; then
-
-	# よく使うので先に定義
-	outdir="${builddir}/out/target/product/${device}"
 
 	# リネームする
 	mv -v --backup=t ${outdir}/${zipname}.zip ${newzipname}.zip
