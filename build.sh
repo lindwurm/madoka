@@ -63,11 +63,27 @@ if [ "${ENABLE_CCACHE}" = "true" ]; then
   ccache -M 30G
 fi
 
-# repo sync
+# -s stands for repo sync
 if [ "${sync}" = "true" ]; then
-  echo "[INFO] repo sync..."
-  repo sync -j$(nproc) -c --force-sync --no-clone-bundle --no-tags
-  echo -e "\n"
+  # clone https://github.com/FlokoROM/patch into madoka/patch
+  if [ $builddir = "floko" ] && [ -f ../madoka/patch/floko.sh ]; then
+    echo "[INFO] reset and cleaning..."
+    # WARNING: this command will reset all repositories under floko, any local changes will be lost
+    repo forall -c git reset --hard
+    repo forall -c git clean -fd 
+    echo "[INFO] repo sync..."
+    repo sync -j$(nproc) -c --force-sync --no-clone-bundle --no-tags
+    echo -e "\n" 
+    echo "[INFO] patching..."
+    cd ../madoka/patch
+    ./floko.sh
+    echo "[INFO] done"
+    cd ../../$builddir
+  else
+    echo "[INFO] repo sync..."
+    repo sync -j$(nproc) -c --force-sync --no-clone-bundle --no-tags
+    echo -e "\n"
+  fi
 fi
 
 # -n stands for SELINUX_IGNORE_NEVERALLOWS
